@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  face-service:
+    build: ./face-service
+    container_name: face-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./face-service/app/dataset:/app/dataset
+    restart: always
+
+  express:
+    build: ./express
+    container_name: express-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./express/src/uploads:/app/uploads
+    depends_on:
+      - face-service
+    restart: always
