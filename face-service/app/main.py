@@ -1,12 +1,16 @@
-from fastapi import FastAPI
-from register import register_face
+from fastapi import FastAPI, UploadFile, File
 from recognize import recognize_face
 
-app = FastAPI(title="Face Recognition Service")
+app = FastAPI()
 
 @app.get("/")
 def root():
     return {"status": "Face service running"}
 
-app.post("/register")(register_face)
-app.post("/recognize")(recognize_face)
+@app.post("/recognize")
+async def recognize(image: UploadFile = File(...)):
+    image_bytes = await image.read()
+
+    result = recognize_face(image_bytes)
+
+    return result

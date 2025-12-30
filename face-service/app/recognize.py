@@ -1,40 +1,15 @@
-import face_recognition
-import numpy as np
-import os
-from fastapi import UploadFile, File
+from fastapi import FastAPI, UploadFile, File
 
-DATASET_PATH = "dataset"
+app = FastAPI()
 
-async def recognize_face(file: UploadFile = File(...)):
-    # Leer imagen
-    image = face_recognition.load_image_file(file.file)
-    encodings = face_recognition.face_encodings(image)
+@app.get("/")
+def root():
+    return {"status": "Face service running"}
 
-    if len(encodings) == 0:
-        return {"match": False}
-
-    unknown_encoding = encodings[0]
-
-    # Recorrer dataset
-    for filename in os.listdir(DATASET_PATH):
-        if not filename.endswith(".npy"):
-            continue
-
-        known_encoding = np.load(
-            os.path.join(DATASET_PATH, filename),
-            allow_pickle=True
-        )
-
-        matches = face_recognition.compare_faces(
-            [known_encoding],
-            unknown_encoding,
-            tolerance=0.5
-        )
-
-        if matches[0]:
-            return {
-                "match": True,
-                "student_id": filename.replace(".npy", "")
-            }
-
-    return {"match": False}
+@app.post("/recognize")
+def recognize_face(image_bytes: bytes):
+    # Por ahora simulamos reconocimiento
+    return {
+        "recognized": True,
+        "confidence": 0.95
+    }
