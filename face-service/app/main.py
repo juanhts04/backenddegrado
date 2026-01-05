@@ -2,8 +2,31 @@ from fastapi import FastAPI, UploadFile, File, Form
 import face_recognition
 import numpy as np
 import os
+from fastapi.openapi.utils import get_openapi
 
-app = FastAPI()
+app = FastAPI(
+    title="Face Recognition API",
+    description="Servicio de reconocimiento facial",
+    version="1.0.0",
+)
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    openapi_schema["servers"] = [
+        {"url": "https://juanbiometric.duckdns.org", "description": "Producción"},
+        {"url": "http://localhost:8000", "description": "Local"},
+    ]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 FACES_DIR = "faces"
 os.makedirs(FACES_DIR, exist_ok=True)
@@ -12,7 +35,6 @@ os.makedirs(FACES_DIR, exist_ok=True)
 @app.get("/")
 def root():
     return {"status": "Face service running"}
-
 
 @app.post("/register-face")
 async def register_face(
@@ -31,7 +53,6 @@ async def register_face(
         "message": "Rostro registrado",
         "person": name
     }
-
 
 @app.post("/recognize")
 async def recognize_face(image: UploadFile = File(...)):

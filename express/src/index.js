@@ -33,11 +33,11 @@ app.post("/recognize-face", upload.single("image"), async (req, res) => {
       contentType: req.file.mimetype,
     });
 
-    const response = await axios.post(
-      "http://face-service:8000/recognize",
-      formData,
-      { headers: formData.getHeaders() }
-    );
+ const response = await axios.post(
+  "https://juanbiometric.duckdns.org/recognize", // ✅ ahora apunta al subdominio HTTPS
+  formData,
+  { headers: formData.getHeaders() }
+);
 
     console.log("Respuesta REAL FastAPI:", response.data);
 
